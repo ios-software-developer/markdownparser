@@ -50,10 +50,10 @@ struct ShopsRootView: View {
             .navigationTitle("Shops")
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button {
+                    Button(action: {
                         editingShop = nil
                         isPresentingAddShop = true
-                    } label {
+                    }) {
                         Image(systemName: "plus")
                     }
                     .accessibilityLabel("Add new shop")
