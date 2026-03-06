@@ -1,5 +1,6 @@
 import SwiftUI
 import SwiftData
+import UIKit
 
 struct ShopsGridView: View {
     let shops: [Shop]
@@ -121,6 +122,8 @@ struct AddOrEditShopSheet: View {
     @State private var name: String = ""
     @State private var selectedIcon: String = "storefront.fill"
     @State private var selectedColorHex: String = ShopColorPalette.defaultColors.first?.hex ?? "E63946"
+    @State private var isShowingColorPicker = false
+    @State private var showLowContrastWarning = false
 
     private var isEditing: Bool {
         shopToEdit != nil
@@ -168,19 +171,36 @@ struct AddOrEditShopSheet: View {
                         HStack(spacing: 12) {
                             ForEach(ShopColorPalette.defaultColors) { color in
                                 Button {
-                                    selectedColorHex = color.hex
+                                    if color.isCustom {
+                                        isShowingColorPicker = true
+                                    } else {
+                                        selectedColorHex = color.hex
+                                        showLowContrastWarning = !ColorContrastValidator.hasSufficientContrast(hex: selectedColorHex)
+                                    }
                                 } label: {
                                     Circle()
                                         .fill(color.color)
                                         .frame(width: 32, height: 32)
                                         .overlay {
-                                            if selectedColorHex == color.hex {
+                                            if !color.isCustom, selectedColorHex == color.hex {
                                                 Image(systemName: "checkmark.circle.fill")
+                                                    .foregroundStyle(.white)
+                                            } else if color.isCustom {
+                                                Image(systemName: "eyedropper.halffull")
                                                     .foregroundStyle(.white)
                                             }
                                         }
                                 }
                             }
+                        }
+                    }
+                    if showLowContrastWarning {
+                        HStack(spacing: 8) {
+                            Image(systemName: "exclamationmark.triangle.fill")
+                                .foregroundStyle(Color.yellow)
+                            Text("Low contrast — icon may be hard to see on white.")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
                         }
                     }
                 }
@@ -205,6 +225,15 @@ struct AddOrEditShopSheet: View {
                     name = shopToEdit.name
                     selectedIcon = shopToEdit.iconSymbolName
                     selectedColorHex = shopToEdit.iconBackgroundColorHex
+                    showLowContrastWarning = !ColorContrastValidator.hasSufficientContrast(hex: selectedColorHex)
+                }
+            }
+            .sheet(isPresented: $isShowingColorPicker) {
+                SystemColorPicker(
+                    initialHex: selectedColorHex
+                ) { newHex in
+                    selectedColorHex = newHex
+                    showLowContrastWarning = !ColorContrastValidator.hasSufficientContrast(hex: selectedColorHex)
                 }
             }
         }
@@ -256,6 +285,7 @@ struct ShopIconPreview: View {
 struct ShopColorPaletteColor: Identifiable {
     let id = UUID()
     let hex: String
+    let isCustom: Bool
 
     var color: Color {
         Color(hex: hex)
@@ -264,17 +294,18 @@ struct ShopColorPaletteColor: Identifiable {
 
 enum ShopColorPalette {
     static let defaultColors: [ShopColorPaletteColor] = [
-        .init(hex: "E63946"),
-        .init(hex: "F4831F"),
-        .init(hex: "F9C22E"),
-        .init(hex: "2DC653"),
-        .init(hex: "1B7FD4"),
-        .init(hex: "7B2FBE"),
-        .init(hex: "E91E8C"),
-        .init(hex: "00BCD4"),
-        .init(hex: "795548"),
-        .init(hex: "607D8B"),
-        .init(hex: "212121"),
+        .init(hex: "E63946", isCustom: false),
+        .init(hex: "F4831F", isCustom: false),
+        .init(hex: "F9C22E", isCustom: false),
+        .init(hex: "2DC653", isCustom: false),
+        .init(hex: "1B7FD4", isCustom: false),
+        .init(hex: "7B2FBE", isCustom: false),
+        .init(hex: "E91E8C", isCustom: false),
+        .init(hex: "00BCD4", isCustom: false),
+        .init(hex: "795548", isCustom: false),
+        .init(hex: "607D8B", isCustom: false),
+        .init(hex: "212121", isCustom: false),
+        .init(hex: "000000", isCustom: true),
     ]
 }
 
@@ -328,6 +359,117 @@ extension Color {
         )
     }
 }
+
+struct SystemColorPicker: UIViewControllerRepresentable {
+    let initialHex: String
+    let onColorPicked: (String) -> Void
+
+    func makeUIViewController(context: Context) -> UIColorPickerViewController {
+        let controller = UIColorPickerViewController()
+        controller.delegate = context.coordinator
+        controller.selectedColor = UIColor(hex: initialHex) ?? .black
+        return controller
+    }
+
+    func updateUIViewController(_ uiViewController: UIColorPickerViewController, context: Context) {}
+
+    func makeCoordinator() -> Coordinator {
+        Coordinator(onColorPicked: onColorPicked)
+    }
+
+    final class Coordinator: NSObject, UIColorPickerViewControllerDelegate {
+        let onColorPicked: (String) -> Void
+
+        init(onColorPicked: @escaping (String) -> Void) {
+            self.onColorPicked = onColorPicked
+        }
+
+        func colorPickerViewControllerDidSelectColor(_ viewController: UIColorPickerViewController) {
+            guard let hex = viewController.selectedColor.hexString else { return }
+            onColorPicked(hex)
+        }
+    }
+}
+
+extension UIColor {
+    convenience init?(hex: String) {
+        let cleaned = hex.trimmingCharacters(in: CharacterSet.alphanumerics.inverted)
+        var int: UInt64 = 0
+        guard Scanner(string: cleaned).scanHexInt64(&int) else {
+            return nil
+        }
+
+        let r, g, b: UInt64
+        switch cleaned.count {
+        case 6:
+            r = (int >> 16) & 0xFF
+            g = (int >> 8) & 0xFF
+            b = int & 0xFF
+        default:
+            return nil
+        }
+
+        self.init(
+            red: CGFloat(r) / 255,
+            green: CGFloat(g) / 255,
+            blue: CGFloat(b) / 255,
+            alpha: 1
+        )
+    }
+
+    var hexString: String? {
+        var red: CGFloat = 0
+        var green: CGFloat = 0
+        var blue: CGFloat = 0
+        var alpha: CGFloat = 0
+
+        guard getRed(&red, green: &green, blue: &blue, alpha: &alpha) else {
+            return nil
+        }
+
+        let r = Int(red * 255)
+        let g = Int(green * 255)
+        let b = Int(blue * 255)
+
+        return String(format: "%02X%02X%02X", r, g, b)
+    }
+}
+
+enum ColorContrastValidator {
+    static func hasSufficientContrast(hex: String) -> Bool {
+        let color = Color(hex: hex)
+        let uiColor = UIColor(color)
+
+        var red: CGFloat = 0
+        var green: CGFloat = 0
+        var blue: CGFloat = 0
+        var alpha: CGFloat = 0
+
+        guard uiColor.getRed(&red, green: &green, blue: &blue, alpha: &alpha) else {
+            return true
+        }
+
+        let luminance = Self.relativeLuminance(red: red, green: green, blue: blue)
+        let whiteLuminance = 1.0
+
+        let contrastRatio = (whiteLuminance + 0.05) / (Double(luminance) + 0.05)
+        return contrastRatio >= 3.0
+    }
+
+    private static func relativeLuminance(red: CGFloat, green: CGFloat, blue: CGFloat) -> Double {
+        func adjust(_ component: CGFloat) -> Double {
+            let c = Double(component)
+            return c <= 0.03928 ? c / 12.92 : pow((c + 0.055) / 1.055, 2.4)
+        }
+
+        let r = adjust(red)
+        let g = adjust(green)
+        let b = adjust(blue)
+
+        return 0.2126 * r + 0.7152 * g + 0.0722 * b
+    }
+}
+
 
 extension NumberFormatter {
     static let currency: NumberFormatter = {
