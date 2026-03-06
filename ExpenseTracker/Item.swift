@@ -15,7 +15,6 @@ final class Shop {
     var iconSymbolName: String
     var iconBackgroundColorHex: String
     var createdAt: Date
-    @Relationship(deleteRule: .cascade, inverse: \Expense.shop)
     var expenses: [Expense]
 
     init(
@@ -41,7 +40,6 @@ final class Expense {
     var amount: Decimal
     var date: Date
     var note: String?
-    @Relationship(inverse: \Shop.expenses)
     var shop: Shop?
 
     init(
@@ -78,3 +76,4 @@ final class MonthlyBudget {
         self.allocatedAmount = allocatedAmount
     }
 }
+
