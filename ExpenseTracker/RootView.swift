@@ -23,6 +23,7 @@ struct ShopsRootView: View {
 
     @State private var isPresentingAddShop = false
     @State private var editingShop: Shop?
+    @State private var selectedShop: Shop?
 
     private var hasShops: Bool {
         !shops.isEmpty
@@ -35,7 +36,7 @@ struct ShopsRootView: View {
                     ShopsGridView(
                         shops: shops,
                         onTapShop: { shop in
-                            editingShop = nil
+                            selectedShop = shop
                         },
                         onEditShop: { shop in
                             editingShop = shop
@@ -62,6 +63,9 @@ struct ShopsRootView: View {
             .sheet(isPresented: $isPresentingAddShop) {
                 AddOrEditShopSheet(shopToEdit: editingShop)
                     .environment(\.modelContext, modelContext)
+            }
+            .navigationDestination(item: $selectedShop) { shop in
+                ShopDetailView(shop: shop)
             }
         }
     }
