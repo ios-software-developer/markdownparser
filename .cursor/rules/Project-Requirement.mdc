@@ -1,0 +1,1098 @@
+---
+description: 
+alwaysApply: true
+---
+
+**PRODUCT MANAGEMENT REQUIREMENTS**
+
+**SpendWise**
+
+Personal Expense Tracker --- iOS Application
+
+  -----
+  *Track. Analyse. Stay in Control.*
+
+  -----
+
+  --- ----
+  **Document Type**     Product Management Requirements (PMR)
+
+  **Product Name**      SpendWise --- Personal Expense Tracker
+
+  **Platform**          iOS (iPhone-first, iOS 17+)
+
+  **Version**           1.0 --- Initial Release
+
+  **Status**            Draft --- For Review
+
+  **Prepared By**       Product Team
+
+  **Last Updated**      March 2025
+  --- ----
+
+**Table of Contents**
+
+**1. Executive Summary**
+
+SpendWise is a personal expense-tracking iOS application designed to
+give individuals clear, real-time visibility into their monthly
+spending. The app centres on an intuitive shop-based categorisation
+model: users define the shops they regularly visit, assign them custom
+icons and brand colours, and then log each purchase against a specific
+shop.
+
+Two primary tabs drive the experience:
+
+-   Shops Tab --- a grid dashboard showing all user-defined shops and a
+    live badge indicating how much has been spent at each shop in the
+    current month.
+
+-   Analytics Tab --- a monthly summary view displaying total spending
+    across all shops, a fund-utilisation progress bar, and a predictive
+    burn-rate chart that estimates when the monthly budget will be
+    exhausted.
+
+The product targets budget-conscious individuals --- students, young
+professionals, and households --- who want a lightweight, visual
+alternative to spreadsheet-based budgeting.
+
+**2. Goals & Success Metrics**
+
+**2.1 Product Goals**
+
+-   Enable users to create and manage a personal catalogue of shops in
+    under 60 seconds.
+
+-   Provide instant at-a-glance spending awareness through badge counts
+    on shop icons.
+
+-   Give users proactive budget control via monthly fund allocation and
+    burn-rate projection.
+
+-   Deliver a delightful, gesture-driven native iOS experience with zero
+    mandatory sign-up.
+
+**2.2 Success Metrics**
+
+  ---
+  **Element**      **Type**       **Behaviour / Notes**
+  ---- ----- ----
+  DAU / MAU Ratio  Engagement KPI Target ≥ 40% within 90 days of launch
+
+  Shops Created    Adoption KPI   Median ≥ 4 shops within first week
+  per User                        
+
+  Monthly Budget   Feature        ≥ 65% of active users set a monthly
+  Set Rate         Adoption       budget
+
+  Retention (Day   Retention KPI  ≥ 35% Day-30 retention
+  30)                             
+
+  Crash-Free       Quality KPI    ≥ 99.5% crash-free sessions
+  Session Rate                    
+
+  App Store Rating Satisfaction   ≥ 4.5 stars within 60 days
+                   KPI            
+  ---
+
+**3. Scope**
+
+**3.1 In Scope --- v1.0**
+
+-   Shop management: create, edit, delete shops with custom name,
+    AI-suggested icon, and user-selected background colour.
+
+-   Expense entry: log individual expenses against a selected shop with
+    amount, date, and optional note.
+
+-   Shop grid home screen with monthly spend badge overlay.
+
+-   Monthly analytics tab with total spending summary, month selector,
+    fund allocation input, and burn-rate projection chart.
+
+-   Local on-device data persistence (no cloud sync required for v1.0).
+
+**3.2 Out of Scope --- v1.0**
+
+-   Cloud synchronisation / multi-device support (planned v1.1).
+
+-   Recurring expense scheduling.
+
+-   Bank or payment-card import / Open Banking integration.
+
+-   Multi-currency support.
+
+-   Family / shared account mode.
+
+-   Android version.
+
+-   Export to CSV / PDF.
+
+**4. User Personas**
+
+  -----
+  **Persona A --- The Budget-Conscious Student**
+
+  Age: 20--24 \| Device: iPhone SE / iPhone 14 \| iOS literacy: High
+
+  Needs: Track spending across a handful of shops (grocery, coffee,
+  transport) on a fixed monthly stipend.
+
+  Pain Points: Loses track of small daily purchases. Existing apps too
+  complex.
+
+  Goal: Know instantly whether they can afford a coffee before buying it.
+  -----
+
+  -----
+  **Persona B --- The Young Professional**
+
+  Age: 26--35 \| Device: iPhone 15 Pro \| iOS literacy: Expert
+
+  Needs: Monitor discretionary spending across restaurants, retail,
+  subscriptions.
+
+  Pain Points: Month-end surprises; no predictive insight into when
+  budget runs out.
+
+  Goal: Set a monthly budget and see a clear visual forecast of remaining
+  funds.
+  -----
+
+  -----
+  **Persona C --- The Household Manager**
+
+  Age: 32--50 \| Device: iPhone 14 Plus \| iOS literacy: Moderate
+
+  Needs: Manage household shopping across multiple shops (supermarket,
+  pharmacy, school).
+
+  Pain Points: Cannot easily separate spending by shop/category at
+  month-end.
+
+  Goal: See how much was spent at each shop per month without manual
+  sorting.
+  -----
+
+**5. Information Architecture**
+
+The application is a two-tab structure accessible from a persistent
+UITabBarController at the bottom of the screen.
+
+  ---
+  **Element**      **Type**       **Behaviour / Notes**
+  ---- ----- ----
+  Tab 1 --- Shops  UITabBarItem   Icon: storefront.fill \| Title: Shops
+
+  Tab 2 ---        UITabBarItem   Icon: chart.bar.fill \| Title: Analytics
+  Analytics                       
+
+  Add Shop Sheet   Modal Sheet    Presented modally over Tab 1 via nav bar
+                                  button
+
+  Shop Detail View Push / Nav     Tapping a shop grid cell pushes expense
+                                  list
+
+  Add Expense      Modal Sheet    Presented from Shop Detail via nav bar
+  Sheet                           button
+  ---
+
+**6. Feature Specifications**
+
+**6.1 Tab 1 --- Shops Home Screen**
+
+**6.1.1 Empty State**
+
+When no shops have been created, the grid area is replaced by an
+empty-state view containing an illustration, the message \"No shops
+yet - tap + to add your first shop\", and a prominent CTA button
+labelled \"Add Shop\". The empty state must be accessible (Dynamic Type,
+VoiceOver label: \"No shops added yet\").
+
+**6.1.2 Navigation Bar**
+
+  ---
+  **Element**      **Type**             **Behaviour / Notes**
+  ---- ----- ----
+  Screen Title     Large Title          Text: \"Shops\" \| Large title style, SF
+                   (UINavigationItem)   Pro Display Bold
+
+  Add Shop Button  UIBarButtonItem      System image: plus \| Accessibility
+                   (right)              label: \"Add new shop\" \| Triggers Add
+                                        Shop Sheet
+  ---
+
+**6.1.3 Shop Grid**
+
+Shops are displayed in a UICollectionView using a compositional layout
+with a 3-column grid on all iPhone sizes (adjusts to 4 columns on iPad
+in v1.1).
+
+  -----
+  **Element**      **Type**               **Behaviour / Notes**
+  ---- ---- ----
+  Shop Cell        UICollectionViewCell   Rounded square (cornerRadius: 16).
+                                          Contains icon view + shop name label
+                                          below.
+
+  Shop Icon View   UIView                 Circular or rounded-square background in
+                                          the user-selected colour. Displays the
+                                          SF Symbol or emoji icon in white.
+
+  Shop Name Label  UILabel                Below icon. SF Pro Rounded Medium, 12pt.
+                                          Truncates with ellipsis at 1 line.
+
+  Expense Badge    UILabel / Badge View   Positioned top-right of icon. Shows
+                                          formatted currency amount (e.g.
+                                          \"\$42\"). Font: SF Pro Bold, 10pt.
+                                          Background: systemRed. Text: white.
+                                          Rounded. Hidden when spend = \$0.
+
+  Long-press Menu  UIContextMenu          Options: Edit Shop, View Expenses,
+                                          Delete Shop.
+  -----
+
+Badge Behaviour:
+
+-   The badge displays the SUM of all expense amounts for the current
+    calendar month for that shop.
+
+-   If the total is zero, the badge is hidden.
+
+-   Currency format follows the device locale.
+
+-   Amounts \>= \$1,000 display as \"\$1k\", \>= \$10,000 as \"\$10k\"
+    to preserve layout.
+
+**6.2 Add Shop Sheet**
+
+Presented as a UISheetPresentationController (.medium detent, expandable
+to .large). Contains a UINavigationBar with a Cancel button (left) and a
+Save button (right, initially disabled until Shop Name is non-empty).
+
+**6.2.1 Fields & Controls**
+
+  ----
+  **Element**      **Type**           **Behaviour / Notes**
+  ---- --- ----
+  Shop Name Field  UITextField        Placeholder: \"e.g. Whole Foods\".
+                                      Character limit: 40. Keyboard: default.
+                                      Return key: Next. Required --- Save is
+                                      disabled until non-empty.
+
+  Icon Preview     UIView             Live preview of the generated icon using
+                                      current name and selected background
+                                      colour. Updates in real time as user
+                                      types.
+
+  Suggested Icons  UICollectionView   Horizontally scrollable row of 6--10 SF
+  Row              (horizontal)       Symbol icons auto-suggested based on the
+                                      shop name (see Icon Generation Logic,
+                                      §6.2.2). User can tap any icon to select
+                                      it. Selected icon has a tinted ring
+                                      border.
+
+  Custom Icon      UIButton           Label: \"More Icons...\". Opens a full
+  Button                              SF Symbol browser filtered to relevant
+                                      categories.
+
+  Colour Picker    UILabel            Text: \"Icon Background Colour\".
+  Label                               
+
+  Colour Swatches  UICollectionView   12 preset colour swatches (brand-safe
+                   (horizontal)       palette). Last item is a custom colour
+                                      picker (UIColorPickerViewController).
+                                      Selected swatch has a checkmark overlay.
+
+  Save Button      UIBarButtonItem    Disabled state: opacity 0.4. Enabled
+                   (right)            when name field non-empty. On tap: saves
+                                      shop, dismisses sheet, animates new cell
+                                      into grid.
+  ----
+
+**6.2.2 Icon Generation Logic**
+
+The icon suggestion engine maps keywords in the shop name to curated SF
+Symbol sets. The matching is case-insensitive and uses substring
+matching.
+
+  ---
+  **Element**      **Type**                            **Behaviour / Notes**
+  ---- ----- ----
+  Keywords         Suggested Icons (SF Symbols)        Notes
+
+  grocery, market, cart.fill, basket.fill,             Food / Grocery category
+  food, whole,     storefront.fill, leaf.fill,         
+  fresh, farm      apple.logo                          
+
+  coffee, cafe,    cup.and.saucer.fill, mug.fill,      Café / Coffee category
+  brew, starbucks, flame.fill                          
+  bean                                                 
+
+  pharmacy, drug,  cross.case.fill, pills.fill,        Health / Pharmacy
+  health, medical, heart.fill                          
+  chemist                                              
+
+  petrol, gas,     fuelpump.fill, car.fill             Fuel / Auto
+  fuel, shell, bp,                                     
+  esso                                                 
+
+  restaurant,      fork.knife,                         Dining / Restaurant
+  diner, eat,      takeoutbag.and.cup.and.straw.fill   
+  kitchen, pizza,                                      
+  burger                                               
+
+  book, library,   books.vertical.fill,                Education / Books
+  school,          pencil.and.book.fill                
+  stationery                                           
+
+  clothes,         tshirt.fill, bag.fill               Fashion / Retail
+  fashion,                                             
+  apparel, wear,                                       
+  boutique                                             
+
+  gym, fitness,    figure.run, heart.circle.fill,      Fitness / Sport
+  sport, yoga,     dumbbell.fill                       
+  wellness                                             
+
+  tech,            laptopcomputer, iphone, tv.fill     Technology
+  electronics,                                         
+  computer, phone,                                     
+  apple                                                
+
+  (default --- no  storefront.fill, bag.fill,          Fallback generic icons
+  keyword match)   creditcard.fill                     
+  ---
+
+The first match in keyword order is placed first in the suggestions row.
+Up to 8 distinct symbols are shown. If fewer than 8 match, fill
+remaining slots with generic icons. The user-selected icon persists and
+is stored as a String (SF Symbol name).
+
+**6.2.3 Preset Colour Palette**
+
+The 12 preset colours provide strong contrast against a white SF Symbol.
+Custom colours selected via UIColorPickerViewController are validated
+for a minimum contrast ratio of 3:1 against white (WCAG AA for large
+text / graphical objects).
+
+  -----
+  **Element**      **Type**      **Behaviour / Notes**
+  ---- ---- ----
+  Slot 1           Hex #E63946   Crimson Red
+
+  Slot 2           Hex #F4831F   Tangerine Orange
+
+  Slot 3           Hex #F9C22E   Sunflower Yellow
+
+  Slot 4           Hex #2DC653   Emerald Green
+
+  Slot 5           Hex #1B7FD4   Cobalt Blue
+
+  Slot 6           Hex #7B2FBE   Amethyst Purple
+
+  Slot 7           Hex #E91E8C   Hot Pink
+
+  Slot 8           Hex #00BCD4   Teal Cyan
+
+  Slot 9           Hex #795548   Warm Brown
+
+  Slot 10          Hex #607D8B   Steel Blue-Grey
+
+  Slot 11          Hex #212121   Charcoal Black
+
+  Slot 12          Custom...     Opens UIColorPickerViewController
+  -----
+
+**6.3 Shop Detail Screen**
+
+Tapping a shop cell pushes a detail view displaying the shop name in the
+navigation title, and a chronological list of all expenses logged
+against that shop. A + button in the navigation bar opens the Add
+Expense sheet.
+
+  ----
+  **Element**       **Type**          **Behaviour / Notes**
+  ----- ----- ----
+  Section Headers   UITableView       Grouped by calendar month (e.g. \"March
+                    Section           2025\"). Section header shows month
+                                      total on the right.
+
+  Expense Row       UITableViewCell   Left: optional note (or \"Expense\" if
+                                      blank). Right: amount formatted in
+                                      locale currency. Subtitle: date
+                                      formatted as \"Mon, 3 Mar\".
+
+  Swipe-to-Delete   Trailing Action   Red delete action removes expense and
+                                      updates badge & analytics immediately.
+
+  Monthly Summary   Custom UIView     Shows current month\'s total spend for
+  Header            (pinned top)      this shop in a card at the top.
+  ----
+
+**6.4 Add Expense Sheet**
+
+  ---
+  **Element**      **Type**          **Behaviour / Notes**
+  ---- ----- ----
+  Amount Field     UITextField       Placeholder: \"0.00\". Keyboard:
+                   (numeric)         decimalPad. Required.
+
+  Date Picker      UIDatePicker      Defaults to today. Cannot be a future
+                   (.compact)        date.
+
+  Note Field       UITextField       Placeholder: \"Optional note...\".
+                                     Character limit: 120.
+
+  Save Button      UIBarButtonItem   Enabled when amount \> 0. Saves expense,
+                                     dismisses sheet, triggers badge update.
+  ---
+
+**6.5 Tab 2 --- Analytics Screen**
+
+**6.5.1 Navigation Bar**
+
+  -----
+  **Element**      **Type**      **Behaviour / Notes**
+  ---- ---- ----
+  Screen Title     Large Title   Text: \"Analytics\"
+
+  Month Selector   Custom        Positioned below large title or as a
+                   UIButton /    subtitle. Shows current month (e.g.
+                   Menu          \"March 2025\"). Tapping opens month
+                                 picker.
+  -----
+
+**6.5.2 Month Picker**
+
+A UICalendarView or custom month-year picker is presented in a popover
+or sheet. Months that have at least one expense entry are selectable.
+Months with no data are visually dimmed and non-interactive. The
+selected month drives all data displayed on the Analytics screen.
+
+-   Past months with data: selectable, shown in default style.
+
+-   Current month: highlighted with accent colour.
+
+-   Future months: always disabled.
+
+-   Past months with no data: dimmed (alpha 0.35), non-interactive,
+    VoiceOver reads \"No data for \[month\]\".
+
+**6.5.3 Monthly Summary Card**
+
+  ----
+  **Element**      **Type**        **Behaviour / Notes**
+  ---- --- ----
+  Total Spent      UILabel         Large, prominent display of total spend
+  Label                            for selected month, e.g. \"\$842.50\"
+
+  Budget Allocated UILabel         Shows the budget set for selected month,
+  Label                            e.g. \"of \$1,500.00 budget\". If no
+                                   budget set: \"No budget set --- tap to
+                                   add\".
+
+  Set / Edit       UIButton        Opens a small sheet with a numeric input
+  Budget Button                    to enter monthly fund allocation.
+                                   Pre-fills with existing value if set.
+
+  Remaining Label  UILabel         Shows \"\$657.50 remaining\" in green,
+                   (conditional)   or \"\$342.50 over budget\" in red.
+                                   Hidden if no budget set.
+  ----
+
+**6.5.4 Fund Utilisation Progress Bar**
+
+A horizontal progress bar rendered below the summary card. Visual
+states:
+
+  -----
+  **Element**      **Type**         **Behaviour / Notes**
+  ---- ---- ----
+  \< 70% spent     UIProgressView   Fill colour: systemGreen. Smooth
+                                    animation on load.
+
+  70--89% spent    UIProgressView   Fill colour: systemOrange. Warning
+                                    indicator.
+
+  \>= 90% spent    UIProgressView   Fill colour: systemRed. Critical
+                                    indicator.
+
+  Over budget      UIProgressView   Fill colour: systemRed. Bar fills 100%,
+  (\>100%)                          separate red overflow indicator
+                                    appended.
+
+  No budget set    Empty State      Progress bar hidden; replaced by prompt:
+                                    \"Set a monthly budget to track
+                                    utilisation.\"
+  -----
+
+**6.5.5 Per-Shop Spending Breakdown**
+
+Below the progress bar, a horizontal bar chart (using Swift Charts)
+shows each shop\'s share of the selected month\'s total spend. Bars are
+coloured to match the shop\'s icon background colour. Tapping a bar row
+highlights the shop and shows the exact amount in a tooltip.
+
+**6.5.6 Burn-Rate Projection Chart**
+
+A line chart projected over the remaining days of the selected month.
+This chart is only visible when the selected month is the current month
+AND a budget has been set.
+
+-   X-axis: Days of the current month (1 → last day).
+
+-   Y-axis: Cumulative spend in the user\'s locale currency.
+
+-   Solid line: Actual cumulative spend up to today.
+
+-   Dashed line: Projected cumulative spend from today to end of month,
+    calculated using a linear regression over the last 7 days of
+    spending (or all days in the month if fewer than 7).
+
+-   Horizontal dashed budget line: Drawn at the budget amount as a
+    reference.
+
+-   Intersection annotation: If the projection line crosses the budget
+    line before month-end, a labelled marker is shown at the crossing
+    point with the text \"Est. budget exhausted: \[date\]\".
+
+-   If the projection does not reach the budget before month-end, a
+    positive label is shown: \"Budget sufficient for full month\".
+
+Projection Formula: The average daily spend rate is calculated as
+total_spend / days_elapsed. The projected exhaustion date =
+current_date + (remaining_budget / avg_daily_rate). This calculation
+updates each time a new expense is saved.
+
+**7. Functional Requirements**
+
+**7.1 Shop Management**
+
+  -----
+  **ID**   **Priority**   **Requirement**                    **Acceptance Criteria**
+  ----- ----- ---- ---
+  FR-01    **P0**         The system shall display an        Given 0 shops, the home
+                          empty-state view with              screen shows empty-state
+                          instructional text when no shops   text and Add Shop CTA;
+                          exist.                             no crash occurs.
+
+  FR-02    **P0**         The system shall allow users to    After tapping Save, the
+                          create a new shop by providing a   shop appears in the grid
+                          name, selecting an icon, and       within 300ms with
+                          choosing a background colour.      correct icon and colour.
+
+  FR-03    **P0**         The system shall auto-suggest      Typing \'coffee\'
+                          6--10 SF Symbol icons based on     surfaces
+                          keywords found in the shop name.   cup.and.saucer.fill and
+                                                             mug.fill in the
+                                                             suggestions row.
+
+  FR-04    **P1**         The system shall update icon       Each keypress triggers
+                          suggestions in real time as the    suggestion refresh with
+                          user types in the shop name field. \< 100ms latency.
+
+  FR-05    **P1**         The system shall allow users to    Selected colour is
+                          select a background colour from 11 reflected in the icon
+                          presets or a custom colour via     preview before saving.
+                          UIColorPickerViewController.       
+
+  FR-06    **P1**         The system shall allow users to    Changes are saved and
+                          edit an existing shop\'s name,     the grid cell updates
+                          icon, and colour.                  immediately without
+                                                             requiring app restart.
+
+  FR-07    **P1**         The system shall allow users to    Deletion shows a
+                          delete a shop and all its          confirmation alert
+                          associated expenses.               before executing; after
+                                                             confirmation, the shop
+                                                             and all its expenses are
+                                                             removed from the data
+                                                             store.
+  -----
+
+**7.2 Expense Management**
+
+  -----
+  **ID**   **Priority**   **Requirement**                    **Acceptance Criteria**
+  ----- ----- ---- ---
+  FR-08    **P0**         The system shall allow users to    New expense appears in
+                          add an expense to a specific shop  the shop detail list and
+                          with at minimum an amount and      the badge on the grid
+                          date.                              updates.
+
+  FR-09    **P0**         The system shall display the       Badge shows correct sum;
+                          monthly spend badge on each shop   hidden when sum = \$0.
+                          cell showing the total spend for   
+                          the current calendar month.        
+
+  FR-10    **P1**         The system shall prevent users     Date picker max date =
+                          from entering a future date for an today. Future dates are
+                          expense.                           non-selectable.
+
+  FR-11    **P2**         The system shall allow users to    Deleting an expense
+                          delete an individual expense via   updates the badge total
+                          swipe-to-delete.                   and shop detail list
+                                                             immediately.
+  -----
+
+**7.3 Analytics**
+
+  -----
+  **ID**   **Priority**   **Requirement**                    **Acceptance Criteria**
+  ----- ----- ---- ---
+  FR-12    **P0**         The system shall display total     Total correctly sums all
+                          spending across all shops for the  expenses in the selected
+                          user-selected month.               month.
+
+  FR-13    **P0**         The system shall only allow        Months with no data are
+                          selection of months that have at   visually disabled in the
+                          least one expense entry.           month picker and
+                                                             non-tappable.
+
+  FR-14    **P0**         The system shall allow users to    After entering an
+                          set a monthly fund allocation      amount, the progress bar
+                          (budget) for any month.            and remaining label
+                                                             update.
+
+  FR-15    **P0**         The system shall display a         Bar is accurate to 2
+                          progress bar showing the           decimal places and
+                          proportion of the monthly budget   animates on screen
+                          that has been spent.               entry.
+
+  FR-16    **P1**         The system shall display a         Chart renders with
+                          burn-rate projection chart for the actual and projected
+                          current month when a budget is     lines; shows estimated
+                          set.                               exhaustion date or
+                                                             positive message.
+
+  FR-17    **P1**         The projection shall recalculate   Adding an expense
+                          upon every new expense entry.      immediately refreshes
+                                                             the projection chart
+                                                             without requiring
+                                                             navigation away.
+
+  FR-18    **P2**         The system shall display a         Bar chart renders with
+                          per-shop spending breakdown chart  correct proportional
+                          for the selected month.            widths; colours match
+                                                             shop icon colours.
+  -----
+
+**8. Non-Functional Requirements**
+
+**8.1 Performance**
+
+-   Cold launch time (from tap to interactive home screen): ≤ 1.5
+    seconds on an iPhone 12 or newer.
+
+-   Grid scroll frame rate: ≥ 60 fps on all supported devices (≥ 120 fps
+    on ProMotion devices).
+
+-   Expense save-to-badge-update latency: ≤ 300ms.
+
+-   Chart render time: ≤ 500ms after month selection change.
+
+**8.2 Reliability**
+
+-   All data is persisted to SwiftData (or Core Data) on the main thread
+    with proper context saving. Data must survive app termination and
+    device restart.
+
+-   Crash-free session rate target: ≥ 99.5%.
+
+-   No data loss on app background / foreground transitions.
+
+**8.3 Accessibility**
+
+-   Full Dynamic Type support across all text elements (minimum
+    .caption2, maximum .accessibilityExtraExtraExtraLarge).
+
+-   VoiceOver labels on all interactive elements (buttons, badges,
+    charts).
+
+-   Minimum tap target size: 44×44pt per Apple HIG.
+
+-   Supports both Light and Dark Mode (system and manual override).
+
+-   Colour is never the sole means of conveying information (e.g.
+    progress bar also shows percentage text).
+
+**8.4 Security & Privacy**
+
+-   No network requests in v1.0; all data remains on-device.
+
+-   No user account or PII collected.
+
+-   App data is stored in the app\'s sandboxed container and is included
+    in iCloud Backup by default.
+
+-   Sensitive financial data excluded from iCloud Backup if user opts in
+    to privacy mode (v1.1 consideration).
+
+**8.5 Internationalisation**
+
+-   Currency formatting uses NumberFormatter with .currencyStyle and the
+    device locale.
+
+-   Date formatting uses DateFormatter with .medium style and device
+    locale.
+
+-   All string literals extracted to Localizable.strings; English (en)
+    as base locale for v1.0.
+
+**9. Data Model**
+
+**9.1 Shop Entity**
+
+  -----
+  **Element**              **Type**       **Behaviour / Notes**
+  --- ----- ----
+  id                       UUID           Primary key. Auto-generated on creation.
+
+  name                     String         User-provided shop name. Max 40
+                                          characters.
+
+  iconSymbolName           String         SF Symbol name string, e.g.
+                                          \"cart.fill\".
+
+  iconBackgroundColorHex   String         6-character hex colour string, e.g.
+                                          \"E63946\".
+
+  createdAt                Date           Timestamp of shop creation.
+
+  expenses                 Relationship   One-to-many relationship to Expense
+                           (1→N)          entities.
+  -----
+
+**9.2 Expense Entity**
+
+  ---
+  **Element**      **Type**       **Behaviour / Notes**
+  ---- ----- ----
+  id               UUID           Primary key. Auto-generated on creation.
+
+  amount           Decimal        Expense amount. Stored as Decimal for
+                                  precision. Always positive.
+
+  date             Date           Date of the expense. Time component
+                                  stored but only date used in UI.
+
+  note             String?        Optional user note. Max 120 characters.
+                                  Nullable.
+
+  shop             Relationship   Many-to-one back-reference to owning
+                   (N→1)          Shop entity.
+  ---
+
+**9.3 MonthlyBudget Entity**
+
+  ---
+  **Element**       **Type**      **Behaviour / Notes**
+  ----- ---- ----
+  id                UUID          Primary key.
+
+  year              Int16         Calendar year, e.g. 2025.
+
+  month             Int16         Calendar month (1--12).
+
+  allocatedAmount   Decimal       User-defined fund allocation for that
+                                  month.
+  ---
+
+**10. Technical Architecture Guidance**
+
+  -----
+  **Element**      **Type**               **Behaviour / Notes**
+  ---- ---- ----
+  UI Framework     SwiftUI                Primary UI framework. UIKit used for
+                                          UICalendarView and
+                                          UIColorPickerViewController via
+                                          UIViewRepresentable.
+
+  Data Persistence SwiftData              ModelContainer / ModelContext. \@Query
+                                          macro for reactive data fetching.
+                                          Migrations managed via VersionedSchema.
+
+  Charts           Swift Charts (iOS 16+) Native framework for burn-rate line
+                                          chart and per-shop bar chart. No
+                                          third-party charting library.
+
+  Architecture     MVVM                   View → ViewModel (@Observable) → Model
+                                          (SwiftData). No Combine required; Swift
+                                          Observation framework used.
+
+  Navigation       UITabBarController +   Tab bar managed in SwiftUI.
+                   NavigationStack        NavigationStack with
+                                          .navigationDestination for push
+                                          navigation.
+
+  Icon Suggestion  In-app keyword map     Static dictionary \[String: \[String\]\]
+                                          mapping keyword to SF Symbol names. No
+                                          network call. O(n) scan over token
+                                          array.
+
+  Testing          XCTest + Swift Testing Unit tests for projection formula and
+                                          keyword matching. UI tests for critical
+                                          flows (create shop, add expense).
+
+  Minimum          iOS 17.0               Required for Swift Charts improvements,
+  Deployment                              SwiftData, and UICalendarView stability.
+  -----
+
+**11. Key User Flows**
+
+**11.1 Create a New Shop**
+
+1.  User opens app → Shops tab displayed (empty state or grid).
+
+2.  User taps + in navigation bar → Add Shop sheet slides up to .medium
+    detent.
+
+3.  User types shop name → Icon suggestion row populates in real time.
+
+4.  User selects preferred icon from suggestions row (or taps More
+    Icons...).
+
+5.  User selects background colour from presets or custom picker.
+
+6.  Save button becomes enabled; user taps Save.
+
+7.  Sheet dismisses with animation; new shop cell animates into the
+    grid.
+
+**11.2 Log an Expense**
+
+8.  User taps a shop cell in the grid → Shop Detail screen pushed.
+
+9.  User taps + in navigation bar → Add Expense sheet presented.
+
+10. User enters amount, optionally changes date, optionally enters note.
+
+11. User taps Save → sheet dismissed; expense appears in list.
+
+12. Badge on shop cell in grid updates to reflect new monthly total.
+
+**11.3 Set Monthly Budget & View Projection**
+
+13. User taps Analytics tab → current month selected by default.
+
+14. Monthly summary card shows total spend; budget prompt visible.
+
+15. User taps Set Budget → small sheet appears with numeric input.
+
+16. User enters budget amount and taps Save.
+
+17. Progress bar animates to reflect spend vs. budget.
+
+18. Burn-rate projection chart appears below progress bar with actual +
+    projected lines.
+
+19. If projection crosses budget line: annotation shows estimated
+    exhaustion date.
+
+**11.4 View a Past Month**
+
+20. User is on Analytics tab.
+
+21. User taps the month selector (e.g. \"March 2025\").
+
+22. Month picker opens; months with data are selectable, others dimmed.
+
+23. User selects a past month → all analytics data refreshes for that
+    month.
+
+24. Burn-rate projection chart is hidden for past months (historical
+    data only).
+
+**12. Edge Cases & Error Handling**
+
+  ---
+  **Element**      **Type**       **Behaviour / Notes**
+  ---- ----- ----
+  Scenario         System         User-Facing Message
+                   Behaviour      
+
+  User enters \$0  Save button    Amount field hint: \"Amount must be
+  as expense       remains        greater than zero\"
+  amount           disabled       
+
+  User tries to    Confirmation   \"Deleting this shop will remove all
+  delete a shop    alert shown    \[N\] associated expenses. This cannot
+  with existing    before         be undone.\"
+  expenses         deletion       
+
+  Budget set to    Progress bar   \"Over budget by \[amount\]\" in red
+  less than        shows \>100%   below bar
+  current spending in red,        
+                   overflow       
+                   indicator      
+                   shown          
+
+  No expenses in   Projection     \"Log expenses to see your spending
+  current month    chart shows    projection.\"
+  (projection)     zero-line; no  
+                   exhaustion     
+                   annotation     
+
+  Average daily    Projection     \"Add more expenses to generate a
+  spend = 0 (no    line stays     projection.\"
+  spends yet in    flat;          
+  month)           exhaustion     
+                   date not       
+                   calculated     
+
+  Shop name        Save button    Inline validation hint: \"Please enter a
+  entered with     disabled;      valid shop name\"
+  only whitespace  trimmed value  
+                   treated as     
+                   empty          
+
+  Custom colour    Colour picker  \"Low contrast --- icon may be hard to
+  with             shows warning  see.\"
+  insufficient     icon next to   
+  contrast (\< 3:1 swatch         
+  vs white)                       
+
+  100+ shops in    Collection     No message; performance requirement
+  grid             view renders   still met
+                   with           
+                   virtualised    
+                   cells; no      
+                   layout         
+                   degradation    
+
+  Device clock     Expense dates  No message
+  changed          remain as      
+  mid-session      entered;       
+                   monthly        
+                   groupings      
+                   recalculated   
+                   on next cold   
+                   launch         
+  ---
+
+**13. Release Phasing**
+
+  -----
+  **Phase**   **Milestone**   **Target**   **Key Deliverables**
+  ----- --- --- ---
+  Alpha       Internal build  Week 6       Shop CRUD, expense CRUD, grid with
+                                           badges, empty state.
+
+  Beta        TestFlight      Week 10      Analytics tab (summary + progress bar),
+                                           month selector, budget setting.
+
+  Beta 2      TestFlight      Week 13      Burn-rate projection chart, per-shop
+                                           breakdown chart, full accessibility
+                                           pass.
+
+  RC          Release         Week 15      Bug fixes, performance optimisation,
+              Candidate                    App Store asset creation.
+
+  v1.0 GA     App Store       Week 16      Full v1.0 feature set. Post-launch
+              Launch                       monitoring: crash reports, reviews.
+  -----
+
+**14. Open Questions**
+
+  -----
+  **ID**   **Priority**   **Requirement**                    **Acceptance Criteria**
+  ----- ----- ---- ---
+  OQ-01    **P1**         Should the app support iPad as a   Decision needed by Week
+                          first-class layout in v1.0 or      2.
+                          defer to v1.1?                     
+
+  OQ-02    **P1**         Should the monthly budget be       Recommend: Yes
+                          editable after expenses have been  (editable), no
+                          logged for that month?             restrictions. Confirm
+                                                             with product owner.
+
+  OQ-03    **P2**         Should the burn-rate projection    Recommend weighted 7-day
+                          use a simple linear average or a   average for accuracy.
+                          weighted recency average (giving   Confirm with
+                          more weight to recent days)?       engineering.
+
+  OQ-04    **P2**         What should happen when the user   Recommend informational
+                          has set no budget and views the    prompt with Set Budget
+                          burn-rate section --- hide         CTA inline. Confirm with
+                          entirely or show informational     design.
+                          prompt?                            
+
+  OQ-05    **P2**         Is haptic feedback                 Recommend: Yes, .medium
+                          (UIImpactFeedbackGenerator)        impact on save actions.
+                          desired on expense save, shop      Confirm with UX.
+                          save, and badge update?            
+  -----
+
+**15. Appendix --- Glossary**
+
+  ---
+  **Element**      **Type**          **Behaviour / Notes**
+  ---- ----- ----
+  Term             Definition        Context
+
+  Shop             A user-defined    Core entity in SpendWise
+                   merchant or       
+                   spending category 
+                   represented by a  
+                   named icon.       
+
+  Expense          A single monetary Core entity in SpendWise
+                   transaction       
+                   logged against a  
+                   Shop on a         
+                   specific date.    
+
+  Badge            The small rounded UI pattern
+                   label displayed   
+                   on a shop cell    
+                   showing the       
+                   month\'s total    
+                   spend.            
+
+  Monthly Budget / The total amount  Analytics feature
+  Fund Allocation  of money the user 
+                   plans to spend in 
+                   a given calendar  
+                   month.            
+
+  Burn Rate        The average rate  Analytics projection
+                   at which the user 
+                   is spending money 
+                   per day in the    
+                   current month.    
+
+  Projection       The estimated     Analytics chart feature
+                   future spending   
+                   trajectory        
+                   extrapolated from 
+                   the current burn  
+                   rate.             
+
+  SF Symbol        Apple\'s system   iOS platform
+                   icon library,     
+                   used for shop     
+                   icon              
+                   representation.   
+
+  SwiftData        Apple\'s          Tech stack
+                   first-party       
+                   declarative       
+                   persistence       
+                   framework         
+                   introduced in iOS 
+                   17.               
+
+  Swift Charts     Apple\'s          Tech stack
+                   first-party       
+                   declarative       
+                   charting          
+                   framework         
+                   introduced in iOS 
+                   16.               
+
+  PMR              Product           Document type
+                   Management        
+                   Requirements ---  
+                   this document.    
+  ---
